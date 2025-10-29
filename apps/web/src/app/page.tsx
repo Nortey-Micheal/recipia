@@ -1,65 +1,129 @@
-import Image from "next/image";
+"use client"
+
+import { useState, useMemo } from "react"
+import Link from "next/link"
+import { ChefHat, Search, Filter } from "lucide-react"
+import RecipeGrid from "@/components/recipe-grid"
+import CategoryFilter from "@/components/category-filter"
+import { mockRecipes } from "@/lib/mock-data"
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null)
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null)
+
+  const cuisines = useMemo(() => {
+    return Array.from(new Set(mockRecipes.map((r) => r.cuisine).filter(Boolean)))
+  }, [])
+
+  const mealTypes = useMemo(() => {
+    return Array.from(new Set(mockRecipes.map((r) => r.meal_type).filter(Boolean)))
+  }, [])
+
+  const filteredRecipes = useMemo(() => {
+    return mockRecipes.filter((recipe) => {
+      const matchesSearch =
+        recipe.recipeTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCuisine = !selectedCuisine || recipe.cuisine === selectedCuisine
+      const matchesMealType = !selectedMealType || recipe.meal_type === selectedMealType
+      return matchesSearch && matchesCuisine && matchesMealType
+    })
+  }, [searchQuery, selectedCuisine, selectedMealType])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className=" bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
+        <div className="py-6">
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-linear-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <ChefHat className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                RecipeHub
+              </h1>
+            </Link>
+            <nav className="flex items-center gap-6">
+              <Link
+                href="/favorites"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                Favorites
+              </Link>
+              <Link href="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                About
+              </Link>
+            </nav>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search recipes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className=" max-w-[1300px] overflow-hidden mx-auto py-12">
+        {/* Filters */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Filter Recipes</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CategoryFilter
+              label="Cuisine"
+              options={cuisines!}
+              selected={selectedCuisine}
+              onChange={setSelectedCuisine}
+            />
+            <CategoryFilter
+              label="Meal Type"
+              options={mealTypes!}
+              selected={selectedMealType}
+              onChange={setSelectedMealType}
+            />
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-8">
+          <p className="text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{filteredRecipes.length}</span> recipes
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Recipe Grid */}
+        <div className=" mx-auto ">
+          {filteredRecipes.length > 0 ? (
+            <RecipeGrid recipes={filteredRecipes} />
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-lg text-muted-foreground mb-4">No recipes found matching your criteria.</p>
+              <button
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedCuisine(null)
+                  setSelectedMealType(null)
+                }}
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  )
 }
