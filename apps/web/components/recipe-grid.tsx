@@ -3,18 +3,30 @@
 import Link from "next/link"
 import { Clock, Users, ChefHat } from "lucide-react"
 import type { Recipe } from "@/lib/types"
+import Image from "next/image"
+import { urlFor } from "@/src/sanity/images"
 
 interface RecipeGridProps {
   recipes: Recipe[]
 }
 
 export default function RecipeGrid({ recipes }: RecipeGridProps) {
+
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
       {recipes.map((recipe, index) => {
         // Bento grid layout - vary sizes
-        const isLarge = index % 5 === 0
-        const isMedium = index % 5 === 1 || index % 5 === 2
+        const isLarge = index % 3 === 0 || index === 0
+        const isMedium = index % 3 === 1 || index % 3 === 2
+
+        const imageUrl = recipe?.imageUrl
+        ? urlFor(recipe?.imageUrl)
+            .height(310)
+            .width(550)
+            .quality(80)
+            .auto("format")
+            .url()
+        : `https://placehold.co/550/png`;
 
         return (
           <Link
@@ -26,9 +38,11 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
           >
             {/* Image Container */}
             <div className="relative w-full h-48 md:h-64 lg:h-80 bg-linear-to-br from-secondary to-muted overflow-hidden">
-              <img
-                src={recipe.imageUrl || `/generic-placeholder-icon.png?height=${isLarge ? 400 : 300}&width=${isLarge ? 400 : 300}&query=${recipe.recipeTitle}`}
-                alt={recipe.recipeTitle}
+              <Image
+                src={imageUrl}
+                alt={recipe.recipeTitle!}
+                height="310"
+                width="550"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />

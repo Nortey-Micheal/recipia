@@ -4,19 +4,26 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Clock, Users, ChefHat, Heart } from "lucide-react"
 import { mockRecipes } from "@/lib/mock-data"
+import Image from "next/image"
+import { urlFor } from "@/src/sanity/images"
 
 export default function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const [recipe,setRecipe] = useState<any>(null)
   const [isFavorited, setIsFavorited] = useState(false)
 
+  const fetchRecipe = async () => {
+    const {id} = await params
+    try {
+      const data = await fetch(`/api/getRecipeById?recipeId=${id}`)
+      const recipe = await data.json()
+      setRecipe(recipe.data)
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
-    (
-      async () => {
-        const param = await params
-        const recipe = mockRecipes.find((r) => r._id === param.id)
-        setRecipe(recipe)
-      }
-    )()
+    fetchRecipe()
   },[])
 
   if (!recipe) {
@@ -31,6 +38,15 @@ export default function RecipePage({ params }: { params: Promise<{ id: string }>
       </main>
     )
   }
+
+  const imageUrl = recipe?.imageUrl
+  ? urlFor(recipe?.imageUrl)
+      .height(310)
+      .width(550)
+      .quality(80)
+      .auto("format")
+      .url()
+  : `https://placehold.co/550/png`;
 
   return (
     <main className="min-h-screen bg-background">
@@ -51,8 +67,10 @@ export default function RecipePage({ params }: { params: Promise<{ id: string }>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Image */}
         <div className="relative w-full h-96 rounded-xl overflow-hidden mb-8 border border-border">
-          <img
-            src={`/.jpg?height=400&width=800&query=${recipe.recipeTitle}`}
+          <Image
+            src={imageUrl}
+            height="310"
+            width="550"
             alt={recipe.recipeTitle}
             className="w-full h-full object-cover"
           />
