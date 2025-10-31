@@ -10,6 +10,7 @@ import { urlFor } from "@/src/sanity/images"
 export default function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const [recipe,setRecipe] = useState<any>(null)
   const [isFavorited, setIsFavorited] = useState(false)
+  const [isLoading,setIsLoading] = useState<boolean>(true)
 
   const fetchRecipe = async () => {
     const {id} = await params
@@ -17,8 +18,10 @@ export default function RecipePage({ params }: { params: Promise<{ id: string }>
       const data = await fetch(`/api/getRecipeById?recipeId=${id}`)
       const recipe = await data.json()
       setRecipe(recipe.data)
+      setIsLoading(false)
     } catch (error) {
-      
+      console.log({error})
+      setIsLoading(false)
     }
   }
 
@@ -30,10 +33,18 @@ export default function RecipePage({ params }: { params: Promise<{ id: string }>
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Recipe Not Found</h1>
-          <Link href="/" className="text-primary hover:underline">
-            Back to Recipes
-          </Link>
+          {
+            isLoading ? (
+              <div>Loading recipe. Please wait</div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-foreground mb-4">Recipe Not Found</h1>
+                <Link href="/" className="text-primary hover:underline">
+                  Back to Recipes
+                </Link>
+              </>
+            )
+          }
         </div>
       </main>
     )

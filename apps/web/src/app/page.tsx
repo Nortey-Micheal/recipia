@@ -23,16 +23,21 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const ITEMS_PER_PAGE = 9
+  const [isLoading,setIsLoading] = useState<boolean>(true)
 
   const fetchRecipes = async (page: number = 1) => {
     try {
+      setIsLoading(true)
       const res = await fetch(`/api/getRecipes?page=${page}&limit=${ITEMS_PER_PAGE}`);
       const data = await res.json();
+      // API returns { data: Recipe[], pagination: { ... } }
       setRecipes(Array.isArray(data.data.data) ? data.data.data : []); // Ensure we always set an array
-      setTotalPages(data.pagination.totalPages);
+      setTotalPages(data.pagination?.totalPages ?? 1);
       console.log(data.data)
+      setIsLoading(false)
     } catch (error) {
       console.error("Failed to load recipes:", error);
+      setIsLoading(false)
     }
   }
   
@@ -139,36 +144,40 @@ export default function Home() {
 
         {/* Recipe Grid */}
         <div className=" mx-auto ">
-          {filteredRecipes?.length! > 0 ? (
-            <>
-              <RecipeGrid recipes={filteredRecipes!} />
-              <div className="mt-8">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={(page) => {
-                    setCurrentPage(page)
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
+          {
+            isLoading ? (
+              <div>Loading</div>
+            ) : filteredRecipes?.length! > 0 ? (
+              <>
+                <RecipeGrid recipes={filteredRecipes!} />
+                <div className="mt-8">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                      setCurrentPage(page)
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                  />
+                </div>
+              </>
+            ) : filteredRecipes?.length! === 0 && !isLoading ? (
+              <div className="text-center py-16">
+                <p className="text-lg text-muted-foreground mb-4">No recipes found matching your criteria.</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery("")
+                    setSelectedCuisine(null)
+                    setSelectedMealType(null)
+                    setCurrentPage(1)
                   }}
-                />
+                  className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Clear Filters
+                </button>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground mb-4">No recipes found matching your criteria.</p>
-              <button
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedCuisine(null)
-                  setSelectedMealType(null)
-                  setCurrentPage(1)
-                }}
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          )}
+            ) : null
+          }
         </div>
       </div>
     </main>
