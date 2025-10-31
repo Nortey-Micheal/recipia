@@ -34,8 +34,8 @@ export async function GET(request: Request) {
   return NextResponse.json({
     data: recipes,
     pagination: {
-      total: Number(totalRecipes),
-      totalPages: Math.ceil(Number(totalRecipes) / limit),
+      total: Number(totalRecipes.data),
+      totalPages: Math.ceil(Number(totalRecipes.data) / limit),
       currentPage: page,
       limit,
     },

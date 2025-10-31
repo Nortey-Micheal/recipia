@@ -18,10 +18,10 @@ export default function AboutPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-linear-to-br from-primary to-accent rounded-lg flex items-center justify-center">
             <ChefHat className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground">About RecipeHub</h1>
+          <h1 className="text-4xl font-bold text-foreground">About Recipia</h1>
         </div>
 
         <div className="prose prose-invert max-w-none">
@@ -29,7 +29,7 @@ export default function AboutPage() {
             <section>
               <h2 className="text-2xl font-bold text-foreground mb-3">Our Mission</h2>
               <p className="text-foreground leading-relaxed">
-                RecipeHub is dedicated to bringing culinary inspiration to your kitchen. We curate recipes from around
+                Recipia is dedicated to bringing culinary inspiration to your kitchen. We curate recipes from around
                 the world, making it easy to discover new dishes and expand your cooking repertoire.
               </p>
             </section>

@@ -81,7 +81,7 @@ export default function Home() {
                 <ChefHat className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-                RecipeHub
+                Recipia
               </h1>
             </Link>
             <nav className="flex items-center gap-6">
