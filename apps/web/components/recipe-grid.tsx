@@ -27,7 +27,7 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
             {/* Image Container */}
             <div className="relative w-full h-48 md:h-64 lg:h-80 bg-linear-to-br from-secondary to-muted overflow-hidden">
               <img
-                src={`/generic-placeholder-icon.png?height=${isLarge ? 400 : 300}&width=${isLarge ? 400 : 300}&query=${recipe.recipeTitle}`}
+                src={recipe.imageUrl || `/generic-placeholder-icon.png?height=${isLarge ? 400 : 300}&width=${isLarge ? 400 : 300}&query=${recipe.recipeTitle}`}
                 alt={recipe.recipeTitle}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />

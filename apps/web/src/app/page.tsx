@@ -1,35 +1,69 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import { ChefHat, Search, Filter } from "lucide-react"
 import RecipeGrid from "@/components/recipe-grid"
 import CategoryFilter from "@/components/category-filter"
-import { mockRecipes } from "@/lib/mock-data"
+import Pagination from "@/components/pagination"
+// import { recipes } from "@/lib/mock-data"
+import { defineQuery } from "next-sanity"
+// import { sanityFetch } from "../sanity/live"
+import { Recipe } from "../sanity/types"
+
+const EVENTS_QUERY = defineQuery(`*[
+  _type == "recipe"
+]|order(date asc)`);
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null)
   const [selectedMealType, setSelectedMealType] = useState<string | null>(null)
+  const [recipes, setRecipes] = useState<Recipe[]>([]) // Initialize with empty array instead of undefined
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const ITEMS_PER_PAGE = 9
+
+  const fetchRecipes = async (page: number = 1) => {
+    try {
+      const res = await fetch(`/api/getRecipes?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const data = await res.json();
+      setRecipes(Array.isArray(data.data.data) ? data.data.data : []); // Ensure we always set an array
+      setTotalPages(data.pagination.totalPages);
+      console.log(data.data)
+    } catch (error) {
+      console.error("Failed to load recipes:", error);
+    }
+  }
+  
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedCuisine, selectedMealType])
+
+  // Fetch recipes when page changes
+  useEffect(() => {
+    fetchRecipes(currentPage)
+  }, [currentPage])
 
   const cuisines = useMemo(() => {
-    return Array.from(new Set(mockRecipes.map((r) => r.cuisine).filter(Boolean)))
-  }, [])
+    return Array.from(new Set(recipes.map((r) => r.cuisine || '').filter(Boolean)))
+  }, [recipes])
 
   const mealTypes = useMemo(() => {
-    return Array.from(new Set(mockRecipes.map((r) => r.meal_type).filter(Boolean)))
-  }, [])
+    return Array.from(new Set(recipes.map((r) => r.meal_type || '').filter(Boolean)))
+  }, [recipes])
 
   const filteredRecipes = useMemo(() => {
-    return mockRecipes.filter((recipe) => {
+    return recipes.filter((recipe) => {
       const matchesSearch =
-        recipe.recipeTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        recipe.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        (recipe.recipeTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (recipe.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCuisine = !selectedCuisine || recipe.cuisine === selectedCuisine
       const matchesMealType = !selectedMealType || recipe.meal_type === selectedMealType
       return matchesSearch && matchesCuisine && matchesMealType
     })
-  }, [searchQuery, selectedCuisine, selectedMealType])
+  }, [recipes, searchQuery, selectedCuisine, selectedMealType])
 
   return (
     <main className=" bg-background">
@@ -63,7 +97,7 @@ export default function Home() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search recipes..."
+              placeholder="Search recipes?..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
@@ -99,14 +133,26 @@ export default function Home() {
         {/* Results Count */}
         <div className="mb-8">
           <p className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{filteredRecipes.length}</span> recipes
+            Showing <span className="font-semibold text-foreground">{filteredRecipes?.length}</span> recipes
           </p>
         </div>
 
         {/* Recipe Grid */}
         <div className=" mx-auto ">
-          {filteredRecipes.length > 0 ? (
-            <RecipeGrid recipes={filteredRecipes} />
+          {filteredRecipes?.length! > 0 ? (
+            <>
+              <RecipeGrid recipes={filteredRecipes!} />
+              <div className="mt-8">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => {
+                    setCurrentPage(page)
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                />
+              </div>
+            </>
           ) : (
             <div className="text-center py-16">
               <p className="text-lg text-muted-foreground mb-4">No recipes found matching your criteria.</p>
@@ -115,6 +161,7 @@ export default function Home() {
                   setSearchQuery("")
                   setSelectedCuisine(null)
                   setSelectedMealType(null)
+                  setCurrentPage(1)
                 }}
                 className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >

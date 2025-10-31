@@ -56,7 +56,7 @@ export default function RecipePage({ params }: { params: Promise<{ id: string }>
             alt={recipe.recipeTitle}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-linea-to-t from-black/40 to-transparent" />
         </div>
 
         {/* Title Section */}

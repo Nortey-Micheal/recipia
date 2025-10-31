@@ -24,4 +24,5 @@ export type Recipe = {
     media?: unknown
     _type: "image"
   }
+  imageUrl?: string
 }
