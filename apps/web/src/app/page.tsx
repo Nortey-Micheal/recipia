@@ -85,12 +85,6 @@ export default function Home() {
               </h1>
             </Link>
             <nav className="flex items-center gap-6">
-              <Link
-                href="/favorites"
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-              >
-                Favorites
-              </Link>
               <Link href="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 About
               </Link>
