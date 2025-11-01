@@ -33,7 +33,7 @@ export default function RecipeGrid({ recipes }: RecipeGridProps) {
             key={recipe._id}
             href={`/recipe/${recipe._id}`}
             className={`group relative overflow-hidden rounded-xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg ${
-              isLarge ? "md:col-span-2 md:row-span-2" : isMedium ? "md:row-span-2" : ""
+              isLarge ? "md:col-span-2 md:row-span-2 lg:col-span-1 lg:row-span-1" : isMedium ? "md:row-span-2 lg:row-span-1" : ""
             }`}
           >
             {/* Image Container */}
